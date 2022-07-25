@@ -6,8 +6,25 @@ from artifacts.models import Artifact
 from people.models import Person
 from vehicles.models import Vehicle
 from people.serializers import PersonSerializer
-from vehicle.serializers.vehicles import VehicleSerializer
+from vehicles.serializers.vehicles import VehicleSerializer
 
+
+class DoctorsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    def list(selfself, request):
+        doctors = Person.objects.filter(title="Dr.")
+        results = {
+            "doctors": PersonSerializer(doctors, many=True).data,
+        }
+
+        return Response(results)
+
+class MassDeleteArtifactsViewSet(mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    @action(detail=False, methods=["delete"])
+    def mass_delete(selfself, request, pk=None):
+        for artifact_id in request.POST["ids"].split(","):
+            Artifact.objects.get(id=artifact_id).delete()
+
+        return Response()
 
 class MassDeleteArtifactViewSet(mixins.DestroyModelMixin, viewsets.GenericViewSet):
     @action(detail=False, methods=["delete"])
